@@ -37,7 +37,7 @@ eilerols <- function(A.data, y) {
 		tY.X <-  t(depend) %*% data
 		beta_hat <- matrix(tY.X %*% inv.tX.X, 1)
 ## Some prep for printing
-			y.mean = mean(depend)
+			y.mean <- mean(depend)
 			index <- matrix(1:ncol(beta_hat), nrow(beta_hat))
 			model.coef <- rbind(index, beta_hat)
 #			fits <- matrix(NA, nrow= nrow(data), ncol = ncol(beta_hat))
@@ -58,24 +58,17 @@ eilerols <- function(A.data, y) {
 		model.se <- sqrt(sum(resid^2)/(nrow(data) - ncol(data)))
 		beta.var <- model.se * inv.tX.X
 		beta.var.k <- model.se * diag(beta.var)
-		beta.se.k <- sqrt(beta.var.k)
+		beta.se.k <- sqrt(beta.var.k)	
+		t.stat.k <- beta_hat / beta.se.k
+		R.squared <- 1 - (sum((depend - fitted)^2) / sum((depend - y.mean)^2))
+		F.stat <- (R.squared / (ncol(data) - 1)) / ((1 - R.squared) / (nrow(data) - ncol(data)))
 ## Print Results
-			cat('Coefficients', '	', 'Standard Errors', '\n')
+			cat('Coefficients', '       ', 'Standard Errors', '       ', 't-statistic', '\n')
 				for(i in 1:ncol(model.coef)){ # print the model coefficients
-					cat('beta', i - 1, '=', model.coef[2,i], '	', beta.se.k[i, ], '\n')
+					cat('beta', i - 1, '=', model.coef[2,i], '  ', beta.se.k[i], 
+						'             ', t.stat.k[i], '\n')
 				}
 			cat('\n Average of the dependent:', y.mean, '\n', '\n', 'ANOVA: \n',
-				'Model Standard Error:', model.se, '\n')
+				'Model Standard Error:', model.se, '\n', 'R-squared:', R.squared, '\n',
+					'F-stat:', F.stat, '\n')
 }
-
-
-
-# test the linear regression
-setwd('G:/QuantitativeMethods/RawData')
-A <- read.csv('usgdp_R.csv', header = TRUE)
-
-OLS <- lm(Y ~ C + I + G, data = A)
-summary(OLS)
-View(residuals(OLS))
-
-eilerols(A[ ,2:5], 1)
